@@ -3,7 +3,7 @@ a simple animator
 
 
 ## 预览
-![preview](https://github.com/CSnowStack/PointLoadingView/blob/master/imgs/c1.gif)
+![preview](https://github.com/CSnowStack/PointLoadingView/blob/master/imgs/c.gif)
 
 
 
