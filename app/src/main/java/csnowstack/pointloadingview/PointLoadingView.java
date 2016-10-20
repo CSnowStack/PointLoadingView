@@ -14,21 +14,23 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
 
 /**
  * Created by cqll on 2016/8/26.
  */
 
 public class PointLoadingView extends View {
-    private Paint mPaint,mPaintLine;
+    private Paint mPaint, mPaintLine;
     private float mRadius, mGapWidth;
     private float mPointX, mPointY, mFactor;
     private float mPointX1, mPointY1, mFactor1;
     private float mPointX2, mPointY2, mFactor2;
-    private int mWidth, mHeight,mHeightNoLine,mLineWidth=5;
+    private int mWidth, mHeight, mHeightNoLine, mLineWidth = 5;
     private static final float sAngle = (float) (Math.PI / 4);
-    private long mDuration=800;
+    private long mDuration = 1000;
+
+    private ValueAnimator mAnim, mAnim1, mAnim2;
+
     public PointLoadingView(Context context) {
         super(context);
     }
@@ -40,7 +42,7 @@ public class PointLoadingView extends View {
         mPaint.setStyle(Paint.Style.FILL);
         mPaint.setColor(Color.BLACK);
 
-        mPaintLine= new Paint();
+        mPaintLine = new Paint();
         mPaintLine.setAntiAlias(true);
         mPaintLine.setStyle(Paint.Style.FILL);
         mPaintLine.setColor(Color.BLACK);
@@ -52,9 +54,9 @@ public class PointLoadingView extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         mWidth = MeasureSpec.getSize(widthMeasureSpec);
         mHeight = MeasureSpec.getSize(heightMeasureSpec);
-        mHeightNoLine=mHeight-mLineWidth;
-        mRadius =( mHeight-mLineWidth) / 6f / 2f;
-        mGapWidth = mRadius / 4f;
+        mHeightNoLine = mHeight - mLineWidth;
+        mRadius = (mHeight - mLineWidth) / 6f / 2f;
+        mGapWidth = mRadius / 6f;
         setMeasuredDimension(mWidth, mHeight);
 
     }
@@ -68,32 +70,55 @@ public class PointLoadingView extends View {
         canvas.drawCircle(mPointX1, mPointY1, mRadius * mFactor1, mPaint);
         canvas.drawCircle(mPointX2, mPointY2, mRadius * mFactor2, mPaint);
 
-        if(mFactor>0.5f){
-            canvas.drawLine(mPointX-(mFactor-0.5f)*3f*mRadius,mHeight,mPointX+(mFactor-0.5f)*3f*mRadius,mHeight,mPaintLine);
+        if (mFactor > 0.5f) {
+            canvas.drawLine(mPointX - (mFactor - 0.5f) * 3f * mRadius, mHeight, mPointX + (mFactor - 0.5f) * 3f * mRadius, mHeight, mPaintLine);
         }
 
-        if(mFactor1>0.5f){
-            canvas.drawLine(mPointX1-(mFactor1-0.5f)*3f*mRadius,mHeight,mPointX1+(mFactor1-0.5f)*3f*mRadius,mHeight,mPaintLine);
+        if (mFactor1 > 0.5f) {
+            canvas.drawLine(mPointX1 - (mFactor1 - 0.5f) * 3f * mRadius, mHeight, mPointX1 + (mFactor1 - 0.5f) * 3f * mRadius, mHeight, mPaintLine);
         }
 
-        if(mFactor2>0.5f){
-            canvas.drawLine(mPointX2-(mFactor2-0.5f)*3f*mRadius,mHeight,mPointX2+(mFactor2-0.5f)*3f*mRadius,mHeight,mPaintLine);
+        if (mFactor2 > 0.5f) {
+            canvas.drawLine(mPointX2 - (mFactor2 - 0.5f) * 3f * mRadius, mHeight, mPointX2 + (mFactor2 - 0.5f) * 3f * mRadius, mHeight, mPaintLine);
         }
     }
 
 
-    public void startLoadingAnimation() {
-
+    public void  startLoadingAnimation(){
         LoadingEvaluator loadingEvaluator = new LoadingEvaluator(mWidth, mHeightNoLine, mRadius, mGapWidth);
-        ValueAnimator anim = ValueAnimator.ofObject(loadingEvaluator, new Point(0, 0, 0), new Point(0, mWidth, 0));
-        final ValueAnimator anim1 = ValueAnimator.ofObject(loadingEvaluator, new Point(0, 0, 0), new Point(0, mWidth, 0));
-        final ValueAnimator anim2 = ValueAnimator.ofObject(loadingEvaluator, new Point(0, 0, 0), new Point(0, mWidth, 0));
+        mAnim = ValueAnimator.ofObject(loadingEvaluator, new Point(0, 0, 0), new Point(0, mWidth, 0));
+        mAnim1 = ValueAnimator.ofObject(loadingEvaluator, new Point(0, 0, 0), new Point(0, mWidth, 0));
+        mAnim2 = ValueAnimator.ofObject(loadingEvaluator, new Point(0, 0, 0), new Point(0, mWidth, 0));
 
-        anim.setDuration(mDuration);
-        anim1.setDuration(mDuration);
-        anim2.setDuration(mDuration);
+        mAnim.setDuration(mDuration);
+        mAnim1.setDuration(mDuration);
+        mAnim2.setDuration(mDuration);
 
-        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        mAnim.setRepeatCount(Integer.MAX_VALUE);
+        mAnim1.setRepeatCount(Integer.MAX_VALUE);
+        mAnim2.setRepeatCount(Integer.MAX_VALUE);
+
+
+        mAnim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                super.onAnimationStart(animation);
+                mAnim1.setStartDelay(mDuration / 10);
+                mAnim1.start();
+            }
+        });
+
+        mAnim1.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                super.onAnimationStart(animation);
+                mAnim2.setStartDelay(mDuration / 20);
+                mAnim2.start();
+            }
+        });
+
+
+        mAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 Point point = (Point) animation.getAnimatedValue();
@@ -106,25 +131,7 @@ public class PointLoadingView extends View {
             }
         });
 
-        anim.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                super.onAnimationStart(animation);
-                anim1.setStartDelay(80);
-                anim1.start();
-            }
-        });
-
-        anim1.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                super.onAnimationStart(animation);
-                anim2.setStartDelay(80);
-                anim2.start();
-            }
-        });
-
-        anim1.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        mAnim1.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 Point point = (Point) animation.getAnimatedValue();
@@ -135,22 +142,32 @@ public class PointLoadingView extends View {
 
             }
         });
-        anim2.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        mAnim2.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 Point point = (Point) animation.getAnimatedValue();
                 mPointX2 = point.x;
                 mPointY2 = point.y;
                 mFactor2 = point.factor;
-                invalidate();
 
             }
         });
-        anim.setInterpolator(new AccelerateDecelerateInterpolator());
-        anim.setRepeatCount(Integer.MAX_VALUE);
-        anim1.setRepeatCount(Integer.MAX_VALUE);
-        anim2.setRepeatCount(Integer.MAX_VALUE);
-        anim.start();
+
+        mAnim.start();
+    }
+
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if(mAnim!=null)
+            mAnim.cancel();
+
+        if(mAnim1!=null)
+            mAnim1.cancel();
+
+        if(mAnim2!=null)
+            mAnim2.cancel();
     }
 
     static class Point implements Parcelable {
