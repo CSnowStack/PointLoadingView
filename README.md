@@ -1,10 +1,12 @@
 # PointLoadingView
 a simple animator
 
+## animation comes from here
 
-## 预览
+[form](https://material.uplabs.com/posts/loading-animation-dots)
+
+## preview
 ![preview](https://github.com/CSnowStack/PointLoadingView/blob/master/imgs/c.gif)
 
 
-
-[效果来源](https://material.uplabs.com/posts/loading-animation-dots)
+![preview1](https://github.com/CSnowStack/PointLoadingView/blob/master/imgs/c1.png)
