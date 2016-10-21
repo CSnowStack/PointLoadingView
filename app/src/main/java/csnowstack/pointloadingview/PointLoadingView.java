@@ -87,17 +87,12 @@ public class PointLoadingView extends View {
     public void  startLoadingAnimation(){
         LoadingEvaluator loadingEvaluator = new LoadingEvaluator(mWidth, mHeightNoLine, mRadius, mGapWidth);
         mAnim = ValueAnimator.ofObject(loadingEvaluator, new Point(0, 0, 0), new Point(0, mWidth, 0));
-        mAnim1 = ValueAnimator.ofObject(loadingEvaluator, new Point(0, 0, 0), new Point(0, mWidth, 0));
-        mAnim2 = ValueAnimator.ofObject(loadingEvaluator, new Point(0, 0, 0), new Point(0, mWidth, 0));
 
         mAnim.setDuration(mDuration);
-        mAnim1.setDuration(mDuration);
-        mAnim2.setDuration(mDuration);
 
         mAnim.setRepeatCount(Integer.MAX_VALUE);
-        mAnim1.setRepeatCount(Integer.MAX_VALUE);
-        mAnim2.setRepeatCount(Integer.MAX_VALUE);
-
+        mAnim1=mAnim.clone();
+        mAnim2=mAnim.clone();
 
         mAnim.addListener(new AnimatorListenerAdapter() {
             @Override
